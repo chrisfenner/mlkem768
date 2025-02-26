@@ -222,6 +222,27 @@ func encapsulate(cc *[CiphertextSize]byte, encapsulationKey []byte) (ciphertext,
 	return kemEncaps(cc, encapsulationKey, &m)
 }
 
+// FOR TESTING PURPOSES ONLY
+// EncapsulateDerand generates a shared key and an associated ciphertext from an
+// encapsulation key, using m as the random bytes.
+// If the encapsulation key is not valid, Encapsulate returns an error.
+//
+// The shared key must be kept secret.
+func EncapsulateDerand(encapsulationKey []byte, m [32]byte) (ciphertext, sharedKey []byte, err error) {
+	// The actual logic is in a separate function to outline this allocation.
+	var cc [CiphertextSize]byte
+	return encapsulateDerand(&cc, encapsulationKey, m)
+}
+
+func encapsulateDerand(cc *[CiphertextSize]byte, encapsulationKey []byte, m [32]byte) (ciphertext, sharedKey []byte, err error) {
+	if len(encapsulationKey) != EncapsulationKeySize {
+		return nil, nil, errors.New("mlkem768: invalid encapsulation key length")
+	}
+	// Note that the modulus check (step 2 of the encapsulation key check from
+	// FIPS 203, Section 7.2) is performed by polyByteDecode in parseEK.
+	return kemEncaps(cc, encapsulationKey, &m)
+}
+
 // kemEncaps generates a shared key and an associated ciphertext.
 //
 // It implements ML-KEM.Encaps_internal according to FIPS 203, Algorithm 17.
